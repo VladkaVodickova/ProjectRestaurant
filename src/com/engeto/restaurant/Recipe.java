@@ -1,8 +1,11 @@
 package com.engeto.restaurant;
 
 import java.awt.*;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Recipe {
@@ -10,6 +13,7 @@ public class Recipe {
     private BigDecimal price;
     private int preparationTime;
     private List<URL> imageURLS;
+    private List<Recipe> recipeList; //Warning:(16, 26) Contents of collection 'recipeList' are updated, but never queried
 
     public Recipe(String title, BigDecimal price, int preparationTime, List<URL> imageURLS) {
         this.title = title;
@@ -59,6 +63,39 @@ public class Recipe {
             imageURLS.remove(image);
         } else {
             throw new OrderException("At least one image must be present.");
+        }
+    }
+
+    public void saveRecipe () throws IOException {
+        String filename = "recipe.txt";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            writer.write("Title: " + title + "\nPrice: " +  price + "\nPreparation time: " +
+                    preparationTime + "\nImages: " + imageURLS + "\n");
+            writer.newLine();
+        } catch (IOException e) {
+            throw new IOException("Error writing to file: " + filename, e);
+        }
+    }
+
+    public void loadRecipe (String filePath) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\n");
+
+                String title = parts[0];
+                String priceString = parts[1];
+                BigDecimal price = new BigDecimal(priceString);
+                int preparationTime = Integer.parseInt(parts[0]);
+                LocalDate fulfilmentTime = LocalDate.parse(parts[4]);
+
+                Recipe recipe = new Recipe(title, price, preparationTime, new ArrayList<>());
+                recipeList.add(recipe);
+            }
+        } catch (FileNotFoundException e) {
+            throw new IOException("File not found: " + filePath);
+        } catch (IOException e) {
+            throw new IOException("Error reading file: " + filePath, e);
         }
     }
 }
