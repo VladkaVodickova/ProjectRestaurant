@@ -12,8 +12,9 @@ public class Recipe {
     private String title;
     private BigDecimal price;
     private int preparationTime;
-    private List<URL> imageURLS;
+    private List<URL> imageURLS; // should contain blank if no photo present
     private List<Recipe> recipeList; //Warning:(16, 26) Contents of collection 'recipeList' are updated, but never queried
+    private Category category;
 
     public Recipe(String title, BigDecimal price, int preparationTime, List<URL> imageURLS) {
         this.title = title;
@@ -64,6 +65,10 @@ public class Recipe {
         } else {
             throw new OrderException("At least one image must be present.");
         }
+    }
+
+    public String getDescription(){
+        return title + "\t" + price + "Kč";
     }
 
     public void saveRecipe () throws IOException {

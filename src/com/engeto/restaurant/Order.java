@@ -2,39 +2,49 @@ package com.engeto.restaurant;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-public class Order {
-    private int tableNumber;
+public class Order{
+    private Table table;
+    private LocalDate orderDate;
     private LocalTime  orderedTime;
     private List<Order> orderList;
     private String nameOfWaiter;
     private LocalTime fulfilmentTime;
+    private List<Recipe> recipeList;
     private Menu menu;
 
-    public Order(int tableNumber, LocalTime  orderedTime, List<Order> orderList, String nameOfWaiter, LocalTime  fulfilmentTime) {
-        this.tableNumber = tableNumber;
+    public Order(Table table, LocalTime  orderedTime, List<Recipe> recipeList, String nameOfWaiter, LocalTime  fulfilmentTime) {
+        this.table = table;
         this.orderedTime = orderedTime;
-        this.orderList = orderList;
+        this.recipeList = recipeList;
         this.nameOfWaiter = nameOfWaiter;
         this.fulfilmentTime = fulfilmentTime;
+        setOrderDate();
     }
 
-    public Order(int tableNumber, LocalTime  orderedTime, List<Order> orderList, String nameOfWaiter) {
-        this.tableNumber = tableNumber;
+    public Order(Table table, LocalTime  orderedTime, List<Recipe> recipeList, String nameOfWaiter) {
+        this.table = table;
         this.orderedTime = orderedTime;
-        this.orderList = orderList;
+        this.recipeList = recipeList;
         this.nameOfWaiter = nameOfWaiter;
+        setOrderDate();
     }
 
-    public int getTableNumber() {
-        return tableNumber;
+    public Table getTable() {
+        return table;
+    }
+
+    public List<Recipe> getRecipeList() {
+        return recipeList;
+    }
+
+    public LocalDate getOrderDate() {
+        return orderDate;
     }
 
     public LocalTime  getOrderedTime() {
@@ -53,8 +63,12 @@ public class Order {
         return fulfilmentTime;
     }
 
-    public void setTableNumber(int tableNumber) {
-        this.tableNumber = tableNumber;
+    public void setOrderDate() {
+        this.orderDate = LocalDate.now();
+    }
+
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     public void setOrderedTime(LocalTime  orderedTime) {
@@ -92,41 +106,29 @@ public class Order {
         return totalPrice;
     }
 
-    public String getOrderListing (){
+    public String getOrderListing(int tableNumber) {
         StringBuilder orderListing = new StringBuilder();
         orderListing.append("** Objednávky pro stůl č. ").append(tableNumber).append(" **").append("\n****");
-        for (Order order:orderList){
-            orderListing.append("\n").append(orderList.indexOf(order)).append(". ").append(menu.getItemName()).append(" ").append(menu.getNumberofItems()).append("x (").append(menu.getItemPrice().multiply(BigDecimal.valueOf(menu.getNumberofItems()))).append(" Kč):\t").append(order.getOrderedTime()).append("-").append(order.getFulfilmentTime()).append("\tčíšník č. ").append(order.getNameOfWaiter()).append("\n");
+
+        for (Order order : orderList) {
+            if (order.getTableNumber() == tableNumber) {
+                orderListing.append("\n").append(orderList.indexOf(order)).append(". ");
+                List<Menu> menuList = order.getRecipeList();
+
+                for (Menu menu : menuList) {
+                    orderListing.append(menu.getItemName()).append(" ").append(menu.getNumberofItems()).append("x (")
+                            .append(menu.getItemPrice().multiply(BigDecimal.valueOf(menu.getNumberofItems())))
+                            .append(" Kč):\t").append(order.getOrderedTime()).append("-").append(order.getFulfilmentTime())
+                            .append("\tčíšník č. ").append(order.getNameOfWaiter()).append("\n");
+                }
+            }
         }
+
         orderListing.append("\n******");
         return orderListing.toString();
     }
 
-    public void setAndSaveTableNote (int tableNumber, String note) throws IOException{
-        String filename = "table_notes.txt";
-        Set<String> tableNotes = new HashSet<>();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write(tableNumber + ": " + note);
-            writer.newLine();
-        } catch (IOException e) {
-            throw new IOException("Error writing to file: " + filename, e);
-        }
-    }
 
-    public String getTableNote (int tableNumber) throws IOException {
-        String filename = "table_notes.txt";
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith(tableNumber + ": ")) {
-                    return line.substring(line.indexOf(": ") + 2);
-                }
-            }
-        } catch (IOException e) {
-            throw new IOException("Error reading from file: " + filename, e);
-        }
-        return "";
-    }
 
     public void saveOrder () throws IOException{
         String filename = "orders.txt";
@@ -171,4 +173,21 @@ public class Order {
         }
     }
 
+    public Duration getProcessingTime(){
+        return Duration.between(orderedTime,fulfilmentTime);
+    }
+//nemám nejmenšího tucha jak to udělat
+/*
+    public List<String> getOrderedMealNames() {
+        List<String> orderedMealNames = new ArrayList<>();
+
+        for (Order order : orderList) {
+            // Assuming the menu object is accessible from the Order class
+            String mealName = order.getMenu().getItemName();
+            orderedMealNames.add(mealName);
+        }
+
+        return orderedMealNames;
+    }
+*/
 }

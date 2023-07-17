@@ -3,74 +3,42 @@ package com.engeto.restaurant;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
-public class Menu {
-    private String itemName;
-    private BigDecimal itemPrice;
-    private int numberofItems;
-    private List<Menu> menuList;
+public class Menu{
+    private List<Recipe> recipeList;
+    private List<Recipe> menuItems;
 
-
-    public Menu(String itemName, int numberofItems, BigDecimal itemPrice) {
-        this.itemName = itemName;
-        this.numberofItems = numberofItems;
-        this.itemPrice = itemPrice;
+    public Menu(List<Recipe> recipeList) {
+        this.recipeList = recipeList;
+        this.menuItems = new ArrayList<>();
     }
 
-    public String getItemName() {
-        return itemName;
-    }
-
-    public BigDecimal getItemPrice() {
-        return itemPrice;
-    }
-
-    public int getNumberofItems() {
-        return numberofItems;
-    }
-
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-    }
-
-    public void setItemPrice(BigDecimal itemPrice) {
-        this.itemPrice = itemPrice;
-    }
-
-    public void setNumberofItems(int numberofItems) {
-        this.numberofItems = numberofItems;
-    }
-
-    public void addMenu (Menu menu, RecipeList recipeList) throws OrderException{
-        if (menuList.size() < recipeList.getSize()) {
-            menuList.add(menu);
+    public void addMenu (Recipe recipe) throws OrderException{
+        if (menuItems.size() < recipeList.size()) {
+            menuItems.add(recipe);
         } else {
             throw new OrderException("Menu is too big.");
         }
     }
 
-    public void removeMenu (Menu menu){
-        menuList.remove(menu);
+    public void removeMenu (Recipe recipe){
+        menuItems.remove(recipe);
     }
 
-    public void clearMenu (Menu menu){
-        menuList.clear();
+    public void clearMenu (Recipe recipe){
+        menuItems.clear();
     }
 
-    public List<Menu> getMenuList() {
-        return menuList;
+    public List<Recipe> getMenu() {
+        return menuItems;
     }
 
-    public void setMenuList(List<Menu> menuList) {
-        this.menuList = menuList;
-    }
-
-    public String getDescription (){
+    public String getMenuDescription (List<Recipe> recipeList){
         StringBuilder description = new StringBuilder();
-        for (Menu menu: menuList){
-            description.append(getMenuList()).append("\n");
+        for (Recipe recipe: recipeList){
+            description.append(recipe.getDescription()).append("\n");
         }
         return description.toString();
     }
@@ -78,7 +46,7 @@ public class Menu {
     public void saveMenu () throws IOException {
         String filename = "menu.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-                writer.write(getDescription() +  "\n");
+                writer.write(getMenuDescription(recipeList) + "\n");
                 writer.newLine();
         } catch (IOException e) {
             throw new IOException("Error writing to file: " + filename, e);
