@@ -6,13 +6,15 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Recipe {
     private String title;
     private BigDecimal price;
     private int preparationTime;
-    private List<URL> imageURLS; // should contain blank if no photo present
+    private List<URL> imageURLS;
     private List<Recipe> recipeList; //Warning:(16, 26) Contents of collection 'recipeList' are updated, but never queried
     private Category category;
 
@@ -20,7 +22,24 @@ public class Recipe {
         this.title = title;
         this.price = price;
         this.preparationTime = preparationTime;
-        this.imageURLS = imageURLS;
+        this.imageURLS = Objects.requireNonNullElse(imageURLS, Collections.emptyList());
+    }
+
+    public Recipe(String title, BigDecimal price, int preparationTime, List<URL> imageURLS, Category category) {
+        this.title = title;
+        this.price = price;
+        this.preparationTime = preparationTime;
+        this.imageURLS = Objects.requireNonNullElse(imageURLS, Collections.emptyList());
+        this.category = category;
+    }
+
+    public Recipe(String title, BigDecimal price) {
+        this.title = title;
+        this.price = price;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 
     public String getTitle() {
@@ -37,6 +56,10 @@ public class Recipe {
 
     public List<URL> getImageURLS() {
         return imageURLS;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public void setTitle(String title) {
@@ -68,39 +91,13 @@ public class Recipe {
     }
 
     public String getDescription(){
-        return title + "\t" + price + "Kč";
+        return title + "\t" + price;
     }
 
-    public void saveRecipe () throws IOException {
-        String filename = "recipe.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write("Title: " + title + "\nPrice: " +  price + "\nPreparation time: " +
-                    preparationTime + "\nImages: " + imageURLS + "\n");
-            writer.newLine();
-        } catch (IOException e) {
-            throw new IOException("Error writing to file: " + filename, e);
-        }
+    public String getItemName(){
+        return title;
     }
-
-    public void loadRecipe (String filePath) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split("\n");
-
-                String title = parts[0];
-                String priceString = parts[1];
-                BigDecimal price = new BigDecimal(priceString);
-                int preparationTime = Integer.parseInt(parts[0]);
-                LocalDate fulfilmentTime = LocalDate.parse(parts[4]);
-
-                Recipe recipe = new Recipe(title, price, preparationTime, new ArrayList<>());
-                recipeList.add(recipe);
-            }
-        } catch (FileNotFoundException e) {
-            throw new IOException("File not found: " + filePath);
-        } catch (IOException e) {
-            throw new IOException("Error reading file: " + filePath, e);
-        }
+    public BigDecimal getItemPrice(){
+        return new BigDecimal(String.valueOf(price));
     }
 }

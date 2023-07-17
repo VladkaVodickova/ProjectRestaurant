@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Order{
@@ -15,32 +14,38 @@ public class Order{
     private List<Order> orderList;
     private String nameOfWaiter;
     private LocalTime fulfilmentTime;
-    private List<Recipe> recipeList;
-    private Menu menu;
+    private Recipe recipe;
+    private int quantityOfItems;
 
-    public Order(Table table, LocalTime  orderedTime, List<Recipe> recipeList, String nameOfWaiter, LocalTime  fulfilmentTime) {
+    public Order(Table table, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter, LocalTime  fulfilmentTime) {
         this.table = table;
         this.orderedTime = orderedTime;
-        this.recipeList = recipeList;
+        this.recipe = recipe;
         this.nameOfWaiter = nameOfWaiter;
         this.fulfilmentTime = fulfilmentTime;
         setOrderDate();
+        this.quantityOfItems = quantityOfItems;
     }
 
-    public Order(Table table, LocalTime  orderedTime, List<Recipe> recipeList, String nameOfWaiter) {
+    public Order(Table table, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter) {
         this.table = table;
         this.orderedTime = orderedTime;
-        this.recipeList = recipeList;
+        this.recipe = recipe;
         this.nameOfWaiter = nameOfWaiter;
         setOrderDate();
+        this.quantityOfItems = quantityOfItems;
     }
 
     public Table getTable() {
         return table;
     }
 
-    public List<Recipe> getRecipeList() {
-        return recipeList;
+    public int getQuantityOfItems() {
+        return quantityOfItems;
+    }
+
+    public Recipe getRecipe() {
+        return recipe;
     }
 
     public LocalDate getOrderDate() {
@@ -71,6 +76,14 @@ public class Order{
         this.table = table;
     }
 
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
+    }
+
+    public void setQuantityOfItems(int quantityOfItems) {
+        this.quantityOfItems = quantityOfItems;
+    }
+
     public void setOrderedTime(LocalTime  orderedTime) {
         this.orderedTime = orderedTime;
     }
@@ -98,79 +111,11 @@ public class Order{
     public BigDecimal getPrice() {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (Order order : orderList) {
-            BigDecimal itemPrice = menu.getItemPrice();
-            int quantity = menu.getNumberofItems();
-            BigDecimal itemTotalPrice = itemPrice.multiply(BigDecimal.valueOf(quantity));
+            BigDecimal itemPrice = recipe.getItemPrice();
+            BigDecimal itemTotalPrice = itemPrice.multiply(BigDecimal.valueOf(quantityOfItems));
             totalPrice = totalPrice.add(itemTotalPrice);
         }
         return totalPrice;
-    }
-
-    public String getOrderListing(int tableNumber) {
-        StringBuilder orderListing = new StringBuilder();
-        orderListing.append("** Objednávky pro stůl č. ").append(tableNumber).append(" **").append("\n****");
-
-        for (Order order : orderList) {
-            if (order.getTableNumber() == tableNumber) {
-                orderListing.append("\n").append(orderList.indexOf(order)).append(". ");
-                List<Menu> menuList = order.getRecipeList();
-
-                for (Menu menu : menuList) {
-                    orderListing.append(menu.getItemName()).append(" ").append(menu.getNumberofItems()).append("x (")
-                            .append(menu.getItemPrice().multiply(BigDecimal.valueOf(menu.getNumberofItems())))
-                            .append(" Kč):\t").append(order.getOrderedTime()).append("-").append(order.getFulfilmentTime())
-                            .append("\tčíšník č. ").append(order.getNameOfWaiter()).append("\n");
-                }
-            }
-        }
-
-        orderListing.append("\n******");
-        return orderListing.toString();
-    }
-
-
-
-    public void saveOrder () throws IOException{
-        String filename = "orders.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write("Table Number: " + tableNumber + "\nOrder Time: " +  orderedTime + "\nOrdered items: " +
-                    orderList + "\nName of waiter: " + nameOfWaiter + "\nOrder fulfilled in: " + fulfilmentTime+ "\n");
-            writer.newLine();
-        } catch (IOException e) {
-            throw new IOException("Error writing to file: " + filename, e);
-        }
-    }
-
-    public void loadOrders(String filePath) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split("\n");
-
-                int tableNumber = Integer.parseInt(parts[0]);
-                String nameOfWaiter = parts[1];
-                /*
-                List<Recipe> recipeList = new ArrayList<>();
-                String[] recipeId = parts[2].split(";");
-                for (Recipe recipe : recipeList) {
-                    Recipe recipe = findRecipeById(recipeId); // Implement the logic to find the recipe by ID
-                    if (recipe != null) {
-                        recipeList.add(recipe);
-                    } else {
-                        throw new OrderException("Recipe not found for ID: " + recipeId);
-                    }
-                }*/
-                LocalTime  orderedTime = LocalTime .parse(parts[3]);
-                LocalTime  fulfilmentTime = LocalTime .parse(parts[4]);
-
-                Order order = new Order(tableNumber, orderedTime, new ArrayList<>(), nameOfWaiter, fulfilmentTime);
-                orderList.add(order);
-            }
-        } catch (FileNotFoundException e) {
-            throw new IOException("File not found: " + filePath);
-        } catch (IOException e) {
-            throw new IOException("Error reading file: " + filePath, e);
-        }
     }
 
     public Duration getProcessingTime(){

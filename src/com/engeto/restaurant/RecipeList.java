@@ -48,15 +48,4 @@ public class RecipeList extends Recipe{
         }
         return description.toString();
     }
-
-    public void saveRecipeList () throws IOException {
-        String filename = "Recipe_list.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-                writer.write(getDescription() +  "\n");
-                writer.newLine();
-        } catch (IOException e) {
-            throw new IOException("Error writing to file: " + filename, e);
-        }
-    }
-
 }

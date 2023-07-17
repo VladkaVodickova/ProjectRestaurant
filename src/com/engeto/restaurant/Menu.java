@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Menu{
-    private List<Recipe> recipeList;
-    private List<Recipe> menuItems;
+    private final List<Recipe> recipeList;
+    private final List<Recipe> menuItems;
 
     public Menu(List<Recipe> recipeList) {
         this.recipeList = recipeList;
@@ -35,21 +35,11 @@ public class Menu{
         return menuItems;
     }
 
-    public String getMenuDescription (List<Recipe> recipeList){
+    public String getMenuDescription (){
         StringBuilder description = new StringBuilder();
         for (Recipe recipe: recipeList){
             description.append(recipe.getDescription()).append("\n");
         }
         return description.toString();
-    }
-
-    public void saveMenu () throws IOException {
-        String filename = "menu.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-                writer.write(getMenuDescription(recipeList) + "\n");
-                writer.newLine();
-        } catch (IOException e) {
-            throw new IOException("Error writing to file: " + filename, e);
-        }
     }
 }
