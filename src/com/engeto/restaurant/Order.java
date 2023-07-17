@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Order{
@@ -16,21 +17,24 @@ public class Order{
     private LocalTime fulfilmentTime;
     private Recipe recipe;
     private int quantityOfItems;
+    private final Menu menu;
 
-    public Order(Table table, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter, LocalTime  fulfilmentTime) {
+    public Order(Table table, Menu menu, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter, LocalTime  fulfilmentTime) throws OrderException {
         this.table = table;
         this.orderedTime = orderedTime;
-        this.recipe = recipe;
+        this.menu = menu;
+        setRecipe(recipe);
         this.nameOfWaiter = nameOfWaiter;
         this.fulfilmentTime = fulfilmentTime;
         setOrderDate();
         this.quantityOfItems = quantityOfItems;
     }
 
-    public Order(Table table, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter) {
+    public Order(Table table, Menu menu, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter) throws OrderException {
         this.table = table;
         this.orderedTime = orderedTime;
-        this.recipe = recipe;
+        this.menu = menu;
+        setRecipe(recipe);
         this.nameOfWaiter = nameOfWaiter;
         setOrderDate();
         this.quantityOfItems = quantityOfItems;
@@ -76,7 +80,10 @@ public class Order{
         this.table = table;
     }
 
-    public void setRecipe(Recipe recipe) {
+    public void setRecipe(Recipe recipe) throws OrderException {
+        if (!menu.isRecipeInMenu(recipe)) {
+            throw new OrderException ("Recipe is not in the menu");
+        }
         this.recipe = recipe;
     }
 
@@ -104,6 +111,8 @@ public class Order{
         orderList.add(order);
     }
 
+
+
     public boolean isFinished() {
         return fulfilmentTime != null;
     }
@@ -121,18 +130,15 @@ public class Order{
     public Duration getProcessingTime(){
         return Duration.between(orderedTime,fulfilmentTime);
     }
-//nemám nejmenšího tucha jak to udělat
-/*
-    public List<String> getOrderedMealNames() {
-        List<String> orderedMealNames = new ArrayList<>();
 
+    public String getOrderedMealNames() {
+        StringBuilder orderedMealNames = new StringBuilder();
         for (Order order : orderList) {
-            // Assuming the menu object is accessible from the Order class
-            String mealName = order.getMenu().getItemName();
-            orderedMealNames.add(mealName);
+            if (order.getOrderDate().equals(LocalDate.now())){
+                String mealName = order.getRecipe().getItemName();
+                orderedMealNames.append(mealName).append(", ");
+            }
         }
-
-        return orderedMealNames;
+        return orderedMealNames.toString();
     }
-*/
 }

@@ -35,13 +35,13 @@ public class Table {
         this.orderList = orderList;
     }
 
-    public String getOrderListing(int tableNumber) {
+    public String getOrderListing() {
         StringBuilder orderListing = new StringBuilder();
         orderListing.append("** Objednávky pro stůl č. ").append(tableNumber).append(" **").append("\n****");
 
         for (Order order : orderList) {
             if (tableNumber == order.getTable().getTableNumber()) {
-                orderListing.append("\n").append(orderList.indexOf(order)).append(". ");
+                orderListing.append("\n").append(orderList.indexOf(order)+1).append(". ");
                     orderListing.append(order.getRecipe().getItemName()).append(" ").append(order.getQuantityOfItems()).append("x (")
                             .append(order.getRecipe().getItemPrice().multiply(BigDecimal.valueOf(order.getQuantityOfItems())))
                             .append(" Kč):\t").append(order.getOrderedTime()).append("-").append(order.getFulfilmentTime())

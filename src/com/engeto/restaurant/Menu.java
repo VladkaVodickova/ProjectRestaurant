@@ -21,6 +21,11 @@ public class Menu{
         } else {
             throw new OrderException("Menu is too big.");
         }
+    }//podminka musi byt v recipe listu
+
+
+    public List<Recipe> getMenuItems() {
+        return menuItems;
     }
 
     public void removeMenu (Recipe recipe){
@@ -41,5 +46,9 @@ public class Menu{
             description.append(recipe.getDescription()).append("\n");
         }
         return description.toString();
+    }
+
+    public boolean isRecipeInMenu(Recipe recipe) {
+        return recipeList.contains(recipe);
     }
 }

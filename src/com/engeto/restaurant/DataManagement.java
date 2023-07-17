@@ -35,6 +35,7 @@ public class DataManagement {
     public void loadOrders(String filePath) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
+            Menu menu = loadMenu();
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
 
@@ -45,13 +46,15 @@ public class DataManagement {
                 String nameOfWaiter = parts[5];
                 LocalTime  fulfilmentTime = LocalTime .parse(parts[6]);
 
-                Order order = new Order(table, recipe, quantityOfItems, orderedTime, nameOfWaiter, fulfilmentTime);
+                Order order = new Order(table, menu, recipe, quantityOfItems, orderedTime, nameOfWaiter, fulfilmentTime);
                 orderList.add(order);
             }
         } catch (FileNotFoundException e) {
             throw new IOException("File not found: " + filePath);
         } catch (IOException e) {
             throw new IOException("Error reading file: " + filePath, e);
+        } catch (OrderException e) {
+            e.printStackTrace();
         }
     }
 
@@ -63,6 +66,28 @@ public class DataManagement {
         } catch (IOException e) {
             throw new IOException("Error writing to file: " + filename, e);
         }
+    }
+
+    public Menu loadMenu() throws IOException {
+        String filename = "menu.txt";
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\t");
+
+                String recipeName = parts[0];
+                BigDecimal price = new BigDecimal(parts[1]);
+
+                Recipe recipe = new Recipe(recipeName, price);
+                recipeList.add(recipe);
+                Menu menu = new Menu(recipeList);
+            }
+        } catch (FileNotFoundException e) {
+            throw new IOException("File not found: " + filename);
+        } catch (IOException e) {
+            throw new IOException("Error reading file: " + filename, e);
+        }
+        return null;
     }
 
     public void setAndSaveTableNote (int tableNumber, String note) throws IOException {
