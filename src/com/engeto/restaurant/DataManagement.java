@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,20 +22,26 @@ public class DataManagement {
     private Table table;
     private Menu menu;
 
-    public void saveOrder () throws IOException {
+    public void saveOrder (List<Order> orderList) throws IOException {
         String filename = "orders.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write(order.getTable().getTableNumber() + "\t" + order.getRecipe().getItemName()
-                    + "\t" + order.getRecipe().getItemPrice() + "\t" + order.getQuantityOfItems()
-                    + "\t" + order.getOrderedTime() + "\t" + order.getNameOfWaiter() + "\t" + order.getFulfilmentTime() + "\t");
-            writer.newLine();
-        } catch (IOException e) {
-            throw new IOException("Error writing to file: " + filename, e);
+        for (Order order : orderList) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                writer.write(order.getTable().getTableNumber() + "\t" + order.getRecipe().getItemName()
+                        + "\t" + order.getRecipe().getItemPrice() + "\t" + order.getQuantityOfItems()
+                        + "\t" + order.getOrderedTime() + "\t" + order.getNameOfWaiter() + "\t" + order.getFulfilmentTime() + "\t");
+                writer.newLine();
+            } catch (IOException e) {
+                throw new IOException("Error writing to file: " + filename, e);
+            }
         }
     }
 
-    public void loadOrders(String filePath) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+    public void loadOrders() throws IOException {
+        String filename = "orders.txt";
+        if(!Files.exists(Path.of(filename))) {
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             Menu menu = loadMenu();
             while ((line = reader.readLine()) != null) {
@@ -49,16 +57,14 @@ public class DataManagement {
                 Order order = new Order(table, menu, recipe, quantityOfItems, orderedTime, nameOfWaiter, fulfilmentTime);
                 orderList.add(order);
             }
-        } catch (FileNotFoundException e) {
-            throw new IOException("File not found: " + filePath);
         } catch (IOException e) {
-            throw new IOException("Error reading file: " + filePath, e);
+            throw new IOException("Error reading file: " + filename, e);
         } catch (OrderException e) {
             e.printStackTrace();
         }
     }
 
-    public void saveMenu () throws IOException {
+    public void saveMenu (Menu menu) throws IOException {
         String filename = "menu.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             writer.write(menu.getMenuDescription());
@@ -70,6 +76,9 @@ public class DataManagement {
 
     public Menu loadMenu() throws IOException {
         String filename = "menu.txt";
+        if(!Files.exists(Path.of(filename))) {
+            return null;
+        }
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -82,15 +91,13 @@ public class DataManagement {
                 recipeList.add(recipe);
                 Menu menu = new Menu(recipeList);
             }
-        } catch (FileNotFoundException e) {
-            throw new IOException("File not found: " + filename);
         } catch (IOException e) {
             throw new IOException("Error reading file: " + filename, e);
         }
         return null;
     }
 
-    public void setAndSaveTableNote (int tableNumber, String note) throws IOException {
+    public void setAndSaveTableNote (Table table, String note) throws IOException {
         String filename = "table_notes.txt";
         Set<String> tableNotes = new HashSet<>();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -101,12 +108,12 @@ public class DataManagement {
         }
     }
 
-    public String getTableNote (int tableNumber) throws IOException {
+    public String getTableNote (Table table) throws IOException {
         String filename = "table_notes.txt";
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith(tableNumber + ": ")) {
+                if (line.startsWith(table + ": ")) {
                     return line.substring(line.indexOf(": ") + 2);
                 }
             }
@@ -116,19 +123,25 @@ public class DataManagement {
         return "";
     }
 
-    public void saveRecipe () throws IOException {
+    public void saveRecipe (List<Recipe> recipeList) throws IOException {
         String filename = "recipe.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write(recipe.getTitle() + "\t" +  recipe.getItemPrice() + "\t" +
-                    recipe.getPreparationTime() + "\t" + recipe.getImageURLS());
-            writer.newLine();
-        } catch (IOException e) {
-            throw new IOException("Error writing to file: " + filename, e);
+        for (Recipe recipe: recipeList) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                writer.write(recipe.getTitle() + "\t" + recipe.getItemPrice() + "\t" +
+                        recipe.getPreparationTime() + "\t" + recipe.getImageURLS());
+                writer.newLine();
+            } catch (IOException e) {
+                throw new IOException("Error writing to file: " + filename, e);
+            }
         }
     }
 
-    public void loadRecipe (String filePath) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+    public void loadRecipe () throws IOException {
+        String filename = "recipe.txt";
+        if(!Files.exists(Path.of(filename))) {
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
@@ -150,10 +163,8 @@ public class DataManagement {
                 recipeList.add(recipe);
                 }
             }
-        } catch (FileNotFoundException e) {
-            throw new IOException("File not found: " + filePath);
         } catch (IOException e) {
-            throw new IOException("Error reading file: " + filePath, e);
+            throw new IOException("Error reading file: " + filename, e);
         }
     }
 

@@ -35,7 +35,7 @@ public class Table {
         this.orderList = orderList;
     }
 
-    public String getOrderListing() {
+    public String getOrderListing(List<Order> orderList) {
         StringBuilder orderListing = new StringBuilder();
         orderListing.append("** Objednávky pro stůl č. ").append(tableNumber).append(" **").append("\n****");
 

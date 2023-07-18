@@ -33,13 +33,13 @@ public class RestaurantManager {
     }
 
 
-    public Map<String, BigDecimal> calculateTotalPricePerWaiter() {
+    public Map<String, BigDecimal> calculateTotalPricePerWaiter(List<Order> orderList) {
         Map<String, BigDecimal> totalPricePerWaiter = new HashMap<>();
 
         for (Order order : orderList) {
             String waiter = order.getNameOfWaiter();
             BigDecimal totalPrice = totalPricePerWaiter.getOrDefault(waiter, BigDecimal.ZERO);
-            totalPrice = totalPrice.add(order.getPrice());
+            totalPrice = totalPrice.add(order.getPrice(orderList));
             totalPricePerWaiter.put(waiter, totalPrice);
         }
 
@@ -68,17 +68,12 @@ public class RestaurantManager {
             return 0;
         }
     }
-/*
-    public List <Menu> getListOfTodayOrderedMeals(){
-        List <Menu> todayOrderedMeals = new ArrayList<>();
-        LocalDate today = LocalDate.now();
-
-        for (Order order : orderList) {
-            if (order.getOrderDate().equals(today)) {
-                todayOrderedMeals.add(order.getOrderList());
-            }
-        }
-        return todayOrderedMeals;
+    public String getOrdersForTable (Table table, List<Order> orderList){
+        return table.getOrderListing(orderList);
     }
- */
+
+    public String getListOfTodayOrderedMeals(List<Order> orderList){
+        return Order.getOrderedMealNames(orderList);
+    }
+
 }

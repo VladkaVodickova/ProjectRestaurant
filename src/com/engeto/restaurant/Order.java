@@ -117,7 +117,7 @@ public class Order{
         return fulfilmentTime != null;
     }
 
-    public BigDecimal getPrice() {
+    public BigDecimal getPrice(List<Order> orderList) {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (Order order : orderList) {
             BigDecimal itemPrice = recipe.getItemPrice();
@@ -130,8 +130,7 @@ public class Order{
     public Duration getProcessingTime(){
         return Duration.between(orderedTime,fulfilmentTime);
     }
-
-    public String getOrderedMealNames() {
+    public static String getOrderedMealNames(List<Order> orderList) {
         StringBuilder orderedMealNames = new StringBuilder();
         for (Order order : orderList) {
             if (order.getOrderDate().equals(LocalDate.now())){
