@@ -16,7 +16,7 @@ public class Order{
     private LocalTime fulfilmentTime;
     private Recipe recipe;
     private int quantityOfItems;
-    private final Menu menu;
+    private Menu menu;
 
     public Order(Table table, Menu menu, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter, LocalTime  fulfilmentTime) throws OrderException {
         this.table = table;
@@ -35,6 +35,15 @@ public class Order{
         this.menu = menu;
         setRecipe(recipe);
         this.nameOfWaiter = nameOfWaiter;
+        setOrderDate();
+        this.quantityOfItems = quantityOfItems;
+    }
+    public Order(Table table, Recipe recipe, int quantityOfItems, LocalTime  orderedTime, String nameOfWaiter, LocalTime  fulfilmentTime) throws OrderException {
+        this.table = table;
+        this.orderedTime = orderedTime;
+        this.recipe = recipe;
+        this.nameOfWaiter = nameOfWaiter;
+        this.fulfilmentTime = fulfilmentTime;
         setOrderDate();
         this.quantityOfItems = quantityOfItems;
     }
@@ -114,16 +123,6 @@ public class Order{
 
     public boolean isFinished() {
         return fulfilmentTime != null;
-    }
-
-    public BigDecimal getPrice(List<Order> orderList) {
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        for (Order order : orderList) {
-            BigDecimal itemPrice = recipe.getItemPrice();
-            BigDecimal itemTotalPrice = itemPrice.multiply(BigDecimal.valueOf(quantityOfItems));
-            totalPrice = totalPrice.add(itemTotalPrice);
-        }
-        return totalPrice;
     }
 
     public BigDecimal getPricePerOrder() {

@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,38 +25,44 @@ public class DataManagement {
 
     public void saveOrder (List<Order> orderList) throws IOException {
         String filename = "orders.txt";
-        for (Order order : orderList) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-                writer.write(order.getTable().getTableNumber() + "\t" + order.getRecipe().getItemName()
-                        + "\t" + order.getRecipe().getItemPrice() + "\t" + order.getQuantityOfItems()
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (Order order : orderList) {
+                writer.write(order.getTable().getTableNumberAsInt() + "\t" + order.getRecipe().getItemName() + "\t" +order.getRecipe().getItemPrice()
+                        + "\t" + order.getQuantityOfItems()
                         + "\t" + order.getOrderedTime() + "\t" + order.getNameOfWaiter() + "\t" + order.getFulfilmentTime() + "\t");
                 writer.newLine();
+                }
+            System.out.println("Orders were saved.");
             } catch (IOException e) {
                 throw new IOException("Error writing to file: " + filename, e);
             }
         }
-    }
 
     public void loadOrders() throws IOException {
         String filename = "orders.txt";
         if(!Files.exists(Path.of(filename))) {
             return;
         }
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSSSS");
+        List<Order> orderList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
-            Menu menu = loadMenu();
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
 
                 Table table = new Table(Integer.parseInt(parts[0]));
                 Recipe recipe = new Recipe((parts[1]), new BigDecimal(parts[2]));
                 int quantityOfItems = Integer.parseInt(parts[3]);
-                LocalTime orderedTime = LocalTime.parse(parts[4]);
+                LocalTime orderedTime = LocalTime.parse(parts[4], timeFormatter);
                 String nameOfWaiter = parts[5];
-                LocalTime  fulfilmentTime = LocalTime .parse(parts[6]);
+                LocalTime fulfilmentTime = null;
+                if (!"null".equals(parts[6])) {
+                    fulfilmentTime = LocalTime.parse(parts[6], timeFormatter);
+                }
 
-                Order order = new Order(table, menu, recipe, quantityOfItems, orderedTime, nameOfWaiter, fulfilmentTime);
+                Order order = new Order(table, recipe, quantityOfItems, orderedTime, nameOfWaiter, fulfilmentTime);
                 orderList.add(order);
+                System.out.println("Order was loaded " + order + ". ");
             }
         } catch (IOException e) {
             throw new IOException("Error reading file: " + filename, e);
@@ -64,37 +71,53 @@ public class DataManagement {
         }
     }
 
-    public void saveMenu (Menu menu) throws IOException {
+    public void saveMenu (List<Recipe> recipeList) throws IOException {
         String filename = "menu.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write(menu.getMenuDescription());
-            writer.newLine();
+            for (Recipe recipe : recipeList) {
+                writer.write(recipe.getTitle() + "\t" + recipe.getItemPrice() + "\t" +
+                        recipe.getPreparationTime() + "\t" + recipe.getImageURLS());
+                writer.newLine();
+            }
+            System.out.println("Menu was saved.");
         } catch (IOException e) {
             throw new IOException("Error writing to file: " + filename, e);
         }
     }
 
-    public Menu loadMenu() throws IOException {
+    public void loadMenu() throws IOException {
         String filename = "menu.txt";
-        if(!Files.exists(Path.of(filename))) {
-            return null;
+        if (!Files.exists(Path.of(filename))) {
+            return;
         }
+        List<Recipe> recipeList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
 
-                String recipeName = parts[0];
-                BigDecimal price = new BigDecimal(parts[1]);
-
-                Recipe recipe = new Recipe(recipeName, price);
+                List<URL> imageURLs = new ArrayList<>();
+                if (!parts[3].isEmpty() && !parts[3].equals("[]")) {
+                    String[] urls = parts[3].split(",");
+                    for (String urlString : urls) {
+                        try {
+                            if (!urlString.isEmpty()) {
+                                URI uri = new URI(urlString);
+                                URL url = uri.toURL();
+                                imageURLs.add(url);
+                            }
+                        } catch (URISyntaxException | MalformedURLException e) {
+                            throw new IOException("URISyntaxException | MalformedURLException: " + e);
+                        }
+                    }
+                }
+                Recipe recipe = new Recipe(parts[0], new BigDecimal(parts[1]), Integer.parseInt(parts[2]), imageURLs);
                 recipeList.add(recipe);
-                Menu menu = new Menu(recipeList);
+                System.out.println("Menu item was loaded " + recipe.getItemName() + ". ");
             }
         } catch (IOException e) {
             throw new IOException("Error reading file: " + filename, e);
         }
-        return null;
     }
 
     public void setAndSaveTableNote (Table table, String note) throws IOException {
@@ -123,16 +146,17 @@ public class DataManagement {
         return "";
     }
 
-    public void saveRecipe (List<Recipe> recipeList) throws IOException {
+    public void saveRecipe(List<Recipe> recipeList) throws IOException {
         String filename = "recipe.txt";
-        for (Recipe recipe: recipeList) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (Recipe recipe : recipeList) {
                 writer.write(recipe.getTitle() + "\t" + recipe.getItemPrice() + "\t" +
                         recipe.getPreparationTime() + "\t" + recipe.getImageURLS());
                 writer.newLine();
-            } catch (IOException e) {
-                throw new IOException("Error writing to file: " + filename, e);
             }
+            System.out.println("Recipe list was saved.");
+        } catch (IOException e) {
+            throw new IOException("Error writing to file: " + filename, e);
         }
     }
 
@@ -141,27 +165,30 @@ public class DataManagement {
         if(!Files.exists(Path.of(filename))) {
             return;
         }
+        List<Recipe> recipeList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
 
                 List<URL> imageURLs = new ArrayList<>();
-                if (!parts[3].isEmpty()) {
+                if (!parts[3].isEmpty() && !parts[3].equals("[]")) {
                     String[] urls = parts[3].split(",");
                     for (String urlString : urls) {
                         try {
-                            URI uri = new URI(urlString);
-                            URL url = uri.toURL();
-                            imageURLs.add(url);
+                            if (!urlString.isEmpty()) {
+                                URI uri = new URI(urlString);
+                                URL url = uri.toURL();
+                                imageURLs.add(url);
+                            }
                         } catch (URISyntaxException | MalformedURLException e) {
                             throw new IOException("URISyntaxException | MalformedURLException: " + e);
                         }
                     }
-
+                }
                 Recipe recipe = new Recipe(parts[0], new BigDecimal(parts[1]), Integer.parseInt(parts[2]), imageURLs);
                 recipeList.add(recipe);
-                }
+                System.out.println("Recipe was loaded " + recipe.getItemName() + ". ");
             }
         } catch (IOException e) {
             throw new IOException("Error reading file: " + filename, e);

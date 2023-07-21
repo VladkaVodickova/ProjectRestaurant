@@ -51,7 +51,7 @@ public class RestaurantManager {
         for (Order order : orderList) {
             String waiter = order.getNameOfWaiter();
             BigDecimal totalPrice = totalPricePerWaiter.getOrDefault(waiter, BigDecimal.ZERO);
-            totalPrice = totalPrice.add(order.getPrice(orderList));
+            totalPrice = totalPrice.add(order.getPricePerOrder());
             totalPricePerWaiter.put(waiter, totalPrice);
             int orderCount = orderCountPerWaiter.getOrDefault(waiter, 0);
             orderCount++;
