@@ -32,42 +32,64 @@ public class RestaurantManager {
         return orderList;
     }
 
+    public String getDescriptionOfList(List<Order> orderList){
+        StringBuilder descriptionOfList = new StringBuilder();
+        for (Order order: orderList){
+            descriptionOfList.append("Table: ").append(order.getTable().getTableNumber()).append("\t\t")
+                    .append(String.format("%-40s", "Order: " + order.getRecipe().getItemName())).append("Quantity: ")
+                    .append(order.getQuantityOfItems()).append("\t\t").append("Ordered Time: ").append(order.getOrderedTime())
+                    .append("\t\t").append("Ordered by waiter: ").append(order.getNameOfWaiter()).append("\t\t")
+                    .append(String.format("%-40s", "Order finished in: " + order.getFulfilmentTime())).append("Price: ")
+                    .append(order.getPricePerOrder()).append(" Kè\n");
+        }
+        return descriptionOfList.toString();
+    }
 
     public Map<String, BigDecimal> calculateTotalPricePerWaiter(List<Order> orderList) {
         Map<String, BigDecimal> totalPricePerWaiter = new HashMap<>();
-
+        Map<String, Integer> orderCountPerWaiter = new HashMap<>();
         for (Order order : orderList) {
             String waiter = order.getNameOfWaiter();
             BigDecimal totalPrice = totalPricePerWaiter.getOrDefault(waiter, BigDecimal.ZERO);
             totalPrice = totalPrice.add(order.getPrice(orderList));
             totalPricePerWaiter.put(waiter, totalPrice);
+            int orderCount = orderCountPerWaiter.getOrDefault(waiter, 0);
+            orderCount++;
+            orderCountPerWaiter.put(waiter, orderCount);
         }
 
-        return totalPricePerWaiter;
+        Map<String, BigDecimal> result = new HashMap<>();
+        for (String waiter : totalPricePerWaiter.keySet()) {
+            BigDecimal totalPrice = totalPricePerWaiter.get(waiter);
+            int orderCount = orderCountPerWaiter.getOrDefault(waiter, 0);
+            result.put(waiter + " (Number of orders: " + orderCount + ") ", totalPrice);
+        }
+        return result;
     }
 
-    public int calculateAverageProcessingTime (LocalDate startDate, LocalDate endDate) {
+    public long calculateAverageProcessingTime (LocalDate startDate, LocalDate endDate) {
         Duration totalProcessingTime = Duration.ZERO;
         int orderCount = 0;
-
         for (Order order : orderList) {
             LocalDate orderDate = order.getOrderDate();
-            LocalTime orderedTime = order.getOrderedTime();
-            LocalTime fulfillmentTime = order.getFulfilmentTime();
 
-            if (orderDate.isAfter(startDate) && orderDate.isBefore(endDate.plusDays(1))) {
-                Duration processingTime = order.getProcessingTime();
-                totalProcessingTime = totalProcessingTime.plus(processingTime);
-                orderCount++;
+            if ((orderDate.isEqual(startDate) || orderDate.isAfter(startDate)) &&
+                    (orderDate.isEqual(endDate) || orderDate.isBefore(endDate.plusDays(1)))) {
+                Optional<Duration> processingTimeOpt = order.getProcessingTime();
+                if (processingTimeOpt.isPresent()) {
+                    Duration processingTime = processingTimeOpt.get();
+                    totalProcessingTime = totalProcessingTime.plus(processingTime);
+                    orderCount++;
+                }
             }
         }
         if (orderCount > 0) {
-            long averageProcessingTimeInMinutes = totalProcessingTime.toMinutes() / orderCount;
-            return (int) averageProcessingTimeInMinutes;
+            return (totalProcessingTime.toMinutes() / orderCount);
         } else {
             return 0;
         }
     }
+
     public String getOrdersForTable (Table table, List<Order> orderList){
         return table.getOrderListing(orderList);
     }

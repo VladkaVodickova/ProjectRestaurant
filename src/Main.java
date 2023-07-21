@@ -11,16 +11,16 @@ public class Main {
     public static void main(String[] args) {
         try {
             //ukol1
-            task1();
+            //task1();
 
             //ukol2
-            task2();
+            //task2();
 
             //ukol3
             //task3();
 
             //ukol4
-            task4();
+            //task4();
 
             //ukol5
             task5();
@@ -142,11 +142,11 @@ public class Main {
 
         Menu menu = new Menu(menuList);
 
-        Order order1 = new Order(table15, menu, recipe1, 2, LocalTime.now(), "č. 1", LocalTime.now().plusMinutes(3));
-        Order order2 = new Order(table15, menu, recipe3, 2, LocalTime.now(), "č. 2");
-        Order order3 = new Order(table15, menu, recipe4, 4, LocalTime.now(), "č. 3", LocalTime.now().plusMinutes(3));
-        Order order4 = new Order(table15, menu, recipe4, 2, LocalTime.now(), "č. 2");
-        Order order5 = new Order(table2, menu, recipe4, 2, LocalTime.now(), "č. 1");
+        Order order1 = new Order(table15, menu, recipe1, 2, LocalTime.now(), "n.1", LocalTime.now().plusMinutes(3));
+        Order order2 = new Order(table15, menu, recipe3, 2, LocalTime.now().plusMinutes(1), "n.2");
+        Order order3 = new Order(table15, menu, recipe4, 4, LocalTime.now().plusMinutes(2), "n.3", LocalTime.now().plusMinutes(3));
+        Order order4 = new Order(table15, menu, recipe4, 2, LocalTime.now().plusMinutes(4), "n.2");
+        Order order5 = new Order(table2, menu, recipe4, 2, LocalTime.now().plusMinutes(10), "n.1");
 
         List<Order> orderList = new ArrayList<>();
         orderList.add(order1);
@@ -156,22 +156,26 @@ public class Main {
         orderList.add(order5);
 
         RestaurantManager restaurantManager = new RestaurantManager(orderList);
-    //1. Kolik objednávek je aktuálně rozpracovaných a nedokončených.
-        System.out.println("1. " + restaurantManager.getNumberOfUnfinishedOrders());
-    //!!!!2. Možnost seřadit objednávky podle číšníka nebo času zadání. - nutné dát description
-        System.out.println("2.a. " + restaurantManager.sortByWaiter());
-        System.out.println("2.b. " + restaurantManager.sortByOrderTime());
-    //3. Celkovou cenu objednávek pro jednotlivé číšníky (u každého číšníka bude počet jeho zadaných objednávek).
-        System.out.println("3. " + restaurantManager.calculateTotalPricePerWaiter(orderList));
-    //!!!!4. Průměrnou dobu zpracování objednávek, které byly zadány v určitém časovém období. - hází 0 i když by to mělo být 3
-        System.out.println("4. " + restaurantManager.calculateAverageProcessingTime(LocalDate.now(),LocalDate.now().plusDays(1)));
-    //!!!!5. Seznam jídel, které byly dnes objednány. Bez ohledu na to, kolikrát byly objednány. - musí se ty jídla vypisovat jednotlivě
-        System.out.println("5. " + restaurantManager.getListOfTodayOrderedMeals(orderList));
-    //6. Export seznamu objednávek pro jeden stůl ve formátu (například pro výpis na obrazovku):
-        System.out.println("6. " + restaurantManager.getOrdersForTable(table15,orderList));
-        //Číslo stolu na začátku je dvojmístné, pro stoly 1-9 se před číslo umístí mezera.
-
+    //1.
+        System.out.println("1. Kolik objednávek je aktuálně rozpracovaných a nedokončených.\n" + restaurantManager.getNumberOfUnfinishedOrders()+ "\n");
+    //2.
+        System.out.println("2.a. Možnost seřadit objednávky podle číšníka nebo času zadání." + "\n"
+                + restaurantManager.getDescriptionOfList(restaurantManager.sortByWaiter()));
+        System.out.println("2.b. Možnost seřadit objednávky podle číšníka nebo času zadání." + "\n"
+                + restaurantManager.getDescriptionOfList(restaurantManager.sortByOrderTime()));
+    //3. Celkovou cenu objednávek pro jednotlivé číšníky (u každého číšníka bude počet jeho zadaných objednávek).??? proč se to nasobi 5
+        System.out.println("3. " + restaurantManager.calculateTotalPricePerWaiter(orderList) + "\n");
+    //4.
+        System.out.println("4. Průměrnou dobu zpracování objednávek, které byly zadány v určitém časovém období.\n"
+                + restaurantManager.calculateAverageProcessingTime(LocalDate.now(),LocalDate.now().plusDays(1)) + "\n");
+    //5.
+        System.out.println("5.  Seznam jídel, které byly dnes objednány. Bez ohledu na to, kolikrát byly objednány.\n"
+                + restaurantManager.getListOfTodayOrderedMeals(orderList) + "\n");
+    //6.
+        System.out.println("6. Export seznamu objednávek pro jeden stůl ve formátu (například pro výpis na obrazovku):\n"
+                + restaurantManager.getOrdersForTable(table15,orderList) + "\n");
     }
+
     private static void task6(){
 
     }

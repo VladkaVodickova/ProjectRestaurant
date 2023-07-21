@@ -1,10 +1,7 @@
 package com.engeto.restaurant;
 
-import java.io.*;
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Table {
     private int tableNumber;
@@ -19,7 +16,11 @@ public class Table {
         this.orderList = orderList;
     }
 
-    public int getTableNumber() {
+    public String getTableNumber() {
+        return String.format("%2d", tableNumber);
+    }
+
+    public int getTableNumberAsInt() {
         return tableNumber;
     }
 
@@ -40,7 +41,7 @@ public class Table {
         orderListing.append("** Objednávky pro stůl č. ").append(tableNumber).append(" **").append("\n****");
 
         for (Order order : orderList) {
-            if (tableNumber == order.getTable().getTableNumber()) {
+            if (tableNumber == order.getTable().getTableNumberAsInt()) {
                 orderListing.append("\n").append(orderList.indexOf(order)+1).append(". ");
                     orderListing.append(order.getRecipe().getItemName()).append(" ").append(order.getQuantityOfItems()).append("x (")
                             .append(order.getRecipe().getItemPrice().multiply(BigDecimal.valueOf(order.getQuantityOfItems())))

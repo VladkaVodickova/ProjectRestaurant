@@ -5,8 +5,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Order{
     private Table table;
@@ -127,15 +126,29 @@ public class Order{
         return totalPrice;
     }
 
-    public Duration getProcessingTime(){
-        return Duration.between(orderedTime,fulfilmentTime);
+    public BigDecimal getPricePerOrder() {
+        return recipe.getItemPrice().multiply(BigDecimal.valueOf(quantityOfItems));
     }
+
+    public Optional<Duration> getProcessingTime() {
+        if (fulfilmentTime != null) {
+            return Optional.of(Duration.between(orderedTime, fulfilmentTime));
+        }
+        return Optional.empty();
+    }
+
     public static String getOrderedMealNames(List<Order> orderList) {
+        Set<String> uniqueMealNames = new HashSet<>();
         StringBuilder orderedMealNames = new StringBuilder();
+
         for (Order order : orderList) {
-            if (order.getOrderDate().equals(LocalDate.now())){
+            if (order.getOrderDate().equals(LocalDate.now())) {
                 String mealName = order.getRecipe().getItemName();
-                orderedMealNames.append(mealName).append(", ");
+
+                if (!uniqueMealNames.contains(mealName)) {
+                    orderedMealNames.append(mealName).append("\t");
+                    uniqueMealNames.add(mealName);
+                }
             }
         }
         return orderedMealNames.toString();
