@@ -21,7 +21,7 @@ public class Main {
             task2();
 
             System.out.println("ukol3");
-            //task3();
+            task3();
 
             System.out.println("ukol4");
             task4();
