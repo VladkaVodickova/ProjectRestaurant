@@ -10,6 +10,10 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         try {
+            System.out.println("ukol9");
+            DataManagement dataManagement = new DataManagement();
+            dataManagement.loadRecipe();
+
             System.out.println("ukol1");
             task1();
 

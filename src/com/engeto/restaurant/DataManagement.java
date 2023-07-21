@@ -49,20 +49,23 @@ public class DataManagement {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
+                try {
+                    Table table = new Table(Integer.parseInt(parts[0]));
+                    Recipe recipe = new Recipe((parts[1]), new BigDecimal(parts[2]));
+                    int quantityOfItems = Integer.parseInt(parts[3]);
+                    LocalTime orderedTime = LocalTime.parse(parts[4], timeFormatter);
+                    String nameOfWaiter = parts[5];
+                    LocalTime fulfilmentTime = null;
+                    if (!"null".equals(parts[6])) {
+                        fulfilmentTime = LocalTime.parse(parts[6], timeFormatter);
+                    }
 
-                Table table = new Table(Integer.parseInt(parts[0]));
-                Recipe recipe = new Recipe((parts[1]), new BigDecimal(parts[2]));
-                int quantityOfItems = Integer.parseInt(parts[3]);
-                LocalTime orderedTime = LocalTime.parse(parts[4], timeFormatter);
-                String nameOfWaiter = parts[5];
-                LocalTime fulfilmentTime = null;
-                if (!"null".equals(parts[6])) {
-                    fulfilmentTime = LocalTime.parse(parts[6], timeFormatter);
+                    Order order = new Order(table, recipe, quantityOfItems, orderedTime, nameOfWaiter, fulfilmentTime);
+                    orderList.add(order);
+                    System.out.println("Order was loaded " + order + ". ");
+                } catch (Exception e){
+                    throw new OrderException("Wrong format of file: " + e + ". ");
                 }
-
-                Order order = new Order(table, recipe, quantityOfItems, orderedTime, nameOfWaiter, fulfilmentTime);
-                orderList.add(order);
-                System.out.println("Order was loaded " + order + ". ");
             }
         } catch (IOException e) {
             throw new IOException("Error reading file: " + filename, e);
@@ -95,27 +98,30 @@ public class DataManagement {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
-
-                List<URL> imageURLs = new ArrayList<>();
-                if (!parts[3].isEmpty() && !parts[3].equals("[]")) {
-                    String[] urls = parts[3].split(",");
-                    for (String urlString : urls) {
-                        try {
-                            if (!urlString.isEmpty()) {
-                                URI uri = new URI(urlString);
-                                URL url = uri.toURL();
-                                imageURLs.add(url);
+                try {
+                    List<URL> imageURLs = new ArrayList<>();
+                    if (!parts[3].isEmpty() && !parts[3].equals("[]")) {
+                        String[] urls = parts[3].split(",");
+                        for (String urlString : urls) {
+                            try {
+                                if (!urlString.isEmpty()) {
+                                    URI uri = new URI(urlString);
+                                    URL url = uri.toURL();
+                                    imageURLs.add(url);
+                                }
+                            } catch (URISyntaxException | MalformedURLException e) {
+                                throw new IOException("URISyntaxException | MalformedURLException: " + e);
                             }
-                        } catch (URISyntaxException | MalformedURLException e) {
-                            throw new IOException("URISyntaxException | MalformedURLException: " + e);
                         }
                     }
+                    Recipe recipe = new Recipe(parts[0], new BigDecimal(parts[1]), Integer.parseInt(parts[2]), imageURLs);
+                } catch (Exception e){
+                    throw new OrderException("Wrong format of file: " + e);
                 }
-                Recipe recipe = new Recipe(parts[0], new BigDecimal(parts[1]), Integer.parseInt(parts[2]), imageURLs);
                 recipeList.add(recipe);
-                System.out.println("Menu item was loaded " + recipe.getItemName() + ". ");
+                System.out.println("Recipe was loaded " + recipe.getItemName() + ". ");
             }
-        } catch (IOException e) {
+        } catch (IOException | OrderException e) {
             throw new IOException("Error reading file: " + filename, e);
         }
     }
@@ -170,27 +176,30 @@ public class DataManagement {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\t");
-
-                List<URL> imageURLs = new ArrayList<>();
-                if (!parts[3].isEmpty() && !parts[3].equals("[]")) {
-                    String[] urls = parts[3].split(",");
-                    for (String urlString : urls) {
-                        try {
-                            if (!urlString.isEmpty()) {
-                                URI uri = new URI(urlString);
-                                URL url = uri.toURL();
-                                imageURLs.add(url);
+                try {
+                    List<URL> imageURLs = new ArrayList<>();
+                    if (!parts[3].isEmpty() && !parts[3].equals("[]")) {
+                        String[] urls = parts[3].split(",");
+                        for (String urlString : urls) {
+                            try {
+                                if (!urlString.isEmpty()) {
+                                    URI uri = new URI(urlString);
+                                    URL url = uri.toURL();
+                                    imageURLs.add(url);
+                                }
+                            } catch (URISyntaxException | MalformedURLException e) {
+                                throw new IOException("URISyntaxException | MalformedURLException: " + e);
                             }
-                        } catch (URISyntaxException | MalformedURLException e) {
-                            throw new IOException("URISyntaxException | MalformedURLException: " + e);
                         }
                     }
+                        Recipe recipe = new Recipe(parts[0], new BigDecimal(parts[1]), Integer.parseInt(parts[2]), imageURLs);
+                } catch (Exception e){
+                    throw new OrderException("Wrong format of file: " + e);
                 }
-                Recipe recipe = new Recipe(parts[0], new BigDecimal(parts[1]), Integer.parseInt(parts[2]), imageURLs);
                 recipeList.add(recipe);
                 System.out.println("Recipe was loaded " + recipe.getItemName() + ". ");
             }
-        } catch (IOException e) {
+        } catch (IOException | OrderException e) {
             throw new IOException("Error reading file: " + filename, e);
         }
     }
